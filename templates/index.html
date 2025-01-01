@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Disease Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #uploadForm {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+
+        #uploadForm input[type="file"] {
+            margin-bottom: 15px;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        #uploadForm button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        #uploadForm button:hover {
+            background-color: #2980b9;
+        }
+
+        #result {
+            margin-top: 30px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+
+        #result p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        #result img {
+            margin-top: 20px;
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        #result h2 {
+            color: #2c3e50;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <h1>Plant Disease Prediction</h1>
+    
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" id="image" name="file" accept="image/*" required>
+        <button type="submit">Upload Image</button>
+    </form>
+
+    <div id="result">
+        <h2>Prediction Results:</h2>
+        <p><span class="label">Predicted Label:</span> <span id="predictedLabel">N/A</span></p>
+        <p><span class="label">Symptoms:</span> <span id="symptoms">N/A</span></p>
+        <p><span class="label">Medicine:</span> <span id="medicine">N/A</span></p>
+        <p><span class="label">Cure:</span> <span id="cure">N/A</span></p>
+        <img id="uploadedImage" src="" alt="Uploaded Image">
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fileInput = document.getElementById('image');
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Display the results
+                    document.getElementById('predictedLabel').textContent = data.predicted_label;
+                    document.getElementById('symptoms').textContent = data.db_details.symptoms;
+                    document.getElementById('medicine').textContent = data.db_details.medicine;
+                    document.getElementById('cure').textContent = data.db_details.cure;
+
+                    // Display the image
+                    document.getElementById('uploadedImage').src = 'data:image/jpeg;base64,' + data.image_base64;
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error uploading the image.');
+            }
+        });
+    </script>
+</body>
+</html>
